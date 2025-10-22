@@ -46,7 +46,8 @@ def render(viewpoint_camera, pc : Union[GaussianModel, FlameGaussianModel], pipe
         sh_degree=pc.active_sh_degree,
         campos=viewpoint_camera.camera_center.cuda(),
         prefiltered=False,
-        debug=pipe.debug
+        debug=pipe.debug,
+        antialiasing=pipe.antialiasing
     )
 
     rasterizer = GaussianRasterizer(raster_settings=raster_settings)
@@ -83,7 +84,7 @@ def render(viewpoint_camera, pc : Union[GaussianModel, FlameGaussianModel], pipe
         colors_precomp = override_color
 
     # Rasterize visible Gaussians to image, obtain their radii (on screen). 
-    rendered_image, radii = rasterizer(
+    rendered_image, radii, depth_image = rasterizer(
         means3D = means3D,
         means2D = means2D,
         shs = shs,
