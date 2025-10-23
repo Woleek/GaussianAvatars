@@ -323,7 +323,7 @@ if __name__ == "__main__":
     parser.add_argument('--port', type=int, default=6009)
     parser.add_argument('--debug_from', type=int, default=-1)
     parser.add_argument('--detect_anomaly', action='store_true', default=False)
-    parser.add_argument("--interval", type=int, default=60_000, help="A shared iteration interval for test and saving results and checkpoints.")
+    parser.add_argument("--interval", type=int, default=30_000, help="A shared iteration interval for test and saving results and checkpoints.")
     parser.add_argument("--test_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--save_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--quiet", action="store_true")
@@ -335,7 +335,9 @@ if __name__ == "__main__":
     if len(args.test_iterations) == 0:
         args.test_iterations.extend(list(range(args.interval, args.iterations+1, args.interval)))
     if len(args.save_iterations) == 0:
+        print("No save iterations specified, using default.")
         args.save_iterations.extend(list(range(args.interval, args.iterations+1, args.interval)))
+        print("Save iterations: ", args.save_iterations)
     if len(args.checkpoint_iterations) == 0:
         args.checkpoint_iterations.extend(list(range(args.interval, args.iterations+1, args.interval)))
     
