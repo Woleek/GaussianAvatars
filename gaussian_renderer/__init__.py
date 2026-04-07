@@ -9,6 +9,7 @@
 # For inquiries contact  george.drettakis@inria.fr
 #
 
+import inspect
 import torch
 import math
 from typing import Union
@@ -47,7 +48,10 @@ def render(viewpoint_camera, pc : Union[GaussianModel, FlameGaussianModel], pipe
         campos=viewpoint_camera.camera_center.cuda(),
         prefiltered=False,
         debug=pipe.debug,
-        antialiasing=pipe.antialiasing
+        **( {"antialiasing": getattr(pipe, "antialiasing", False)}
+            if "antialiasing" in inspect.signature(GaussianRasterizationSettings).parameters
+            else {} )
+
     )
 
     rasterizer = GaussianRasterizer(raster_settings=raster_settings)
@@ -84,7 +88,7 @@ def render(viewpoint_camera, pc : Union[GaussianModel, FlameGaussianModel], pipe
         colors_precomp = override_color
 
     # Rasterize visible Gaussians to image, obtain their radii (on screen). 
-    rendered_image, radii, depth_image = rasterizer(
+    rasterizer_out = rasterizer(
         means3D = means3D,
         means2D = means2D,
         shs = shs,
@@ -93,6 +97,7 @@ def render(viewpoint_camera, pc : Union[GaussianModel, FlameGaussianModel], pipe
         scales = scales,
         rotations = rotations,
         cov3D_precomp = cov3D_precomp)
+    rendered_image, radii = rasterizer_out[:2]
 
     # Those Gaussians that were frustum culled or had a radius of 0 were not visible.
     # They will be excluded from value updates used in the splitting criteria.
